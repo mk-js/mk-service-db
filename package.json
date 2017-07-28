@@ -1,0 +1,23 @@
+{
+  "name": "mk-service-db",
+  "version": "0.0.2",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ziaochina/mk-service-db.git"
+  },
+  "author": "lsg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ziaochina/mk-service-db/issues"
+  },
+  "homepage": "https://github.com/ziaochina/mk-service-db#readme",
+  "dependencies": {
+    "continuation-local-storage": "^3.2.0",
+    "sequelize": "^4.4.2"
+  }
+}
