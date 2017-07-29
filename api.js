@@ -9,9 +9,13 @@ const api = {
 
 const dbs = {}
 
+const getDB = (name) => { 
+    return dbs[name || 'currentDB'];
+}
+
 const init = () => {
 
-    api.currentDB = dbs.currentDB = dbs[options.name] = newDB(options);
+    dbs.currentDB = dbs[options.name] = newDB(options);
 
     if (Array.isArray(options.dbs)) {
         options.dbs.filter(d => !dbs[d.name]).forEach(d => {
@@ -36,7 +40,7 @@ const interceptor = (ctx) => {
 
     currentDB = currentDB || dbs.currentDB;
 
-    if (currentDB && transactionType == "auto" && !ctx._handler) {
+    if (currentDB && transactionType == 'auto' && !ctx._handler) {
         var transactionWrapper = (data, ctx) => {
             currentDB.transaction((t) => {
                 try {
@@ -68,8 +72,8 @@ const interceptor = (ctx) => {
 
 
 
-module.exports = Object.assign(api, {
-    dbs,
+module.exports = Object.assign(api, { 
+    getDB,
     init,
     interceptor,
 });
