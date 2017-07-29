@@ -1,4 +1,4 @@
-const options = require('./config').current;
+const config = require('./config').current;
 const Sequelize = require("sequelize")
 const cls = require('continuation-local-storage')
 Sequelize.useCLS(cls.createNamespace('my-own-namespace'))
@@ -9,18 +9,26 @@ const api = {
 
 const dbs = {}
 
-const getDB = (name) => { 
+const getDB = (name) => {
     return dbs[name || 'currentDB'];
 }
 
 const init = () => {
 
-    dbs.currentDB = dbs[options.name] = newDB(options);
+    dbs.currentDB = dbs[config.name] = newDB(config);
 
-    if (Array.isArray(options.dbs)) {
-        options.dbs.filter(d => !dbs[d.name]).forEach(d => {
+    if (Array.isArray(config.dbs)) {
+        config.dbs.filter(d => !dbs[d.name]).forEach(d => {
             dbs[d.name] = newDB(d);
         })
+    }
+
+    if (config.server) {
+        var array = config.server.interceptors || [];
+        if (array.filter(a => a == interceptor) == 0) {
+            array.push(interceptor)
+        }
+        config.server.interceptors = array
     }
 }
 
@@ -33,11 +41,14 @@ const newDB = (cfg) => new Sequelize(cfg.database, cfg.user, cfg.pwd, {
 
 const interceptor = (ctx) => {
     var currentDB = null;
-    var transactionType = ctx.handler.transactionType ||
-        ctx.service.config && ctx.service.config.current &&
-        (ctx.service.config.current.transactionType || (currentDB = ctx.service.config.current.db) && ctx.service.config.current.db.transactionType) ||
-        options.transactionType;
-
+    var serviceConfig = ctx.service.config && ctx.service.config.current;
+    var transactionType = ctx.handler.transactionType
+        || serviceConfig && serviceConfig.transactionType
+        || serviceConfig && serviceConfig.db && serviceConfig.db.config.current.transactionType;
+    if (serviceConfig && serviceConfig.db) {
+        currentDB = ctx.service.config.current.db.api.getDB();
+    }
+    transactionType = transactionType || config.transactionType;
     currentDB = currentDB || dbs.currentDB;
 
     if (currentDB && transactionType == 'auto' && !ctx._handler) {
@@ -72,7 +83,7 @@ const interceptor = (ctx) => {
 
 
 
-module.exports = Object.assign(api, { 
+module.exports = Object.assign(api, {
     getDB,
     init,
     interceptor,
